@@ -359,6 +359,26 @@ namespace Stubble.Compilation.Tests
         }
 
         [Fact]
+        public void It_Should_Not_Loop_Dictionary_By_Default()
+        {
+            var stubble = new StubbleCompilationBuilder().Build();
+
+            var obj = new
+            {
+                Dict = new Dictionary<string, string>
+                {
+                    { "key1", "value1" },
+                    { "key2", "value2" },
+                    { "key3", "value3" },
+                }
+            };
+
+            var func = stubble.Compile("{{#Dict}}{{Key}}|{{Value}}.{{/Dict}}", obj);
+
+            Assert.Equal("|.", func(obj));
+        }
+
+        [Fact]
         public void It_Can_Override_Encoding_Function()
         {
             Expression<Func<string, string>> encodingFunc = (str) => str;

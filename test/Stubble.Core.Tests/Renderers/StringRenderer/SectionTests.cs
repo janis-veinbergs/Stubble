@@ -328,5 +328,125 @@ namespace Stubble.Core.Tests.Renderers.StringRenderer
             var myStr = sr.ReadToEnd();
             Assert.Equal(result, myStr);
         }
+
+
+        public class CustomList : List<int>
+        {
+            public override string ToString() => $"CustomList: {string.Join(", ", this)}";
+        }
+
+        public class CustomListChild : CustomList { }
+
+        [Fact]
+        public void It_Can_Render_Inline()
+        {
+            const string result = "1234";
+            var parameters = new CustomList { 1, 2, 3, 4 };
+            var settings = new RendererSettingsBuilder().BuildSettings();
+
+            var context = new Context(
+                parameters,
+                settings,
+                settings.RenderSettings);
+
+            var stringRenderer = new StringRender(StreamWriter, settings.RendererPipeline);
+            var sectionTokenRenderer = new SectionTokenRenderer();
+
+            sectionTokenRenderer.Write(
+                stringRenderer,
+                new SectionToken
+                {
+                    SectionName = ".",
+                    Children = new List<MustacheToken>
+                    {
+                        new InterpolationToken { Content = new StringSlice(".") }
+                    }
+                },
+                context);
+
+            StreamWriter.Flush();
+            MemStream.Position = 0;
+            var sr = new StreamReader(MemStream);
+            var myStr = sr.ReadToEnd();
+            Assert.Equal(result, myStr);
+        }
+
+        /// <summary>
+        /// Blacklist will prevent rendering each item individually
+        /// </summary>
+        [Fact]
+        public void It_Ignores_BlacklistType()
+        {
+            const string result = "CustomList: 1, 2, 3, 4";
+            var parameters = new CustomList() { 1, 2, 3, 4 };
+            var settings = new RendererSettingsBuilder()
+                .AddSectionBlacklistType(typeof(CustomList))
+                .BuildSettings();
+
+            var context = new Context(
+                parameters,
+                settings,
+                settings.RenderSettings);
+
+            var stringRenderer = new StringRender(StreamWriter, settings.RendererPipeline);
+            var sectionTokenRenderer = new SectionTokenRenderer();
+
+            sectionTokenRenderer.Write(
+                stringRenderer,
+                new SectionToken
+                {
+                    SectionName = ".",
+                    Children = new List<MustacheToken>
+                    {
+                        new InterpolationToken { Content = new StringSlice(".") }
+                    }
+                },
+                context);
+
+            StreamWriter.Flush();
+            MemStream.Position = 0;
+            var sr = new StreamReader(MemStream);
+            var myStr = sr.ReadToEnd();
+            Assert.Equal(result, myStr);
+        }
+
+        /// <summary>
+        /// Blacklist will prevent rendering each item individually
+        /// </summary>
+        [Fact]
+        public void It_Ignores_BlacklistType_When_Using_Child_Class()
+        {
+            const string result = "CustomList: 1, 2, 3, 4";
+            var parameters = new CustomListChild() { 1, 2, 3, 4 };
+            var settings = new RendererSettingsBuilder()
+                .AddSectionBlacklistType(typeof(CustomList))
+                .BuildSettings();
+
+            var context = new Context(
+                parameters,
+                settings,
+                settings.RenderSettings);
+
+            var stringRenderer = new StringRender(StreamWriter, settings.RendererPipeline);
+            var sectionTokenRenderer = new SectionTokenRenderer();
+
+            sectionTokenRenderer.Write(
+                stringRenderer,
+                new SectionToken
+                {
+                    SectionName = ".",
+                    Children = new List<MustacheToken>
+                    {
+                        new InterpolationToken { Content = new StringSlice(".") }
+                    }
+                },
+                context);
+
+            StreamWriter.Flush();
+            MemStream.Position = 0;
+            var sr = new StreamReader(MemStream);
+            var myStr = sr.ReadToEnd();
+            Assert.Equal(result, myStr);
+        }
     }
 }
