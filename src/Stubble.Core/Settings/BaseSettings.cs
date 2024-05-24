@@ -45,7 +45,7 @@ namespace Stubble.Core.Settings
             Parser = parser;
             DefaultTags = defaultTags;
             ParserPipeline = parserPipeline;
-            SectionBlacklistTypes = sectionBlacklistTypes.ToImmutableHashSet();
+            SectionBlacklistTypes = new HashSet<Type>(sectionBlacklistTypes);
         }
 
         /// <summary>
@@ -86,6 +86,6 @@ namespace Stubble.Core.Settings
         /// <summary>
         /// Gets the blacklisted types for sections
         /// </summary>
-        public ImmutableHashSet<Type> SectionBlacklistTypes { get; }
+        public HashSet<Type> SectionBlacklistTypes { get; }
     }
 }
